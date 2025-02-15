@@ -12,7 +12,9 @@ import (
 type Node = yaml.Node
 type DOM = v3.Document
 type Info = base.Info
-type Operation = v3.Operation
+type Operation struct {
+	v3.Operation
+}
 type Server = v3.Server
 type Paths = v3.Paths
 type Components = v3.Components
@@ -32,12 +34,29 @@ type Example = base.Example
 type MediaType = v3.MediaType
 
 type API struct {
-	DOM *DOM
+	dom *DOM
+}
+
+type CreateRouteParams struct {
+	path        string
+	description string
+	summary     string
+}
+
+func (api *API) Route(params CreateRouteParams) *Route {
+	return &Route{
+		api:  api,
+		path: params.path,
+		pathItem: &PathItem{
+			Description: params.description,
+			Summary:     params.summary,
+		},
+	}
 }
 
 type Route struct {
+	api      *API
 	path     string
-	pathItem *PathItem
 }
 
 func (r *Route) Get(operation Operation) *Route {
@@ -45,14 +64,16 @@ func (r *Route) Get(operation Operation) *Route {
 		operation.OperationId = fmt.Sprintf("GET %s", r.path)
 	}
 
-	r.pathItem.Get = &operation
+	r.api.dom.Paths.PathItems.Set(r.path)
+
+	r.pathItem.Get = &operation.Operation
 
 	return r
 }
 
-func NewApi(title, version string) API {
+func NewApi(title, version string) *API {
 	newAPI := API{
-		DOM: &DOM{
+		dom: &DOM{
 			Version: "3.0.0",
 			Info: &Info{
 				Title:   title,
@@ -61,5 +82,5 @@ func NewApi(title, version string) API {
 		},
 	}
 
-	return newAPI
+	return &newAPI
 }

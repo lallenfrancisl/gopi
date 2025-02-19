@@ -14,7 +14,22 @@ func main() {
 		Description("This is the description").
 		Summary("This is the summary")
 
-	js, err := api.MarshalJSON()
+	type CreateUser struct {
+		Name     string `json:"name"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+	route.Get().
+		Summary("List users").
+		Tags([]string{"api"}).
+		Body(&CreateUser{})
+	
+	route.Get().
+		Summary("List users 2").
+		Tags([]string{"api"}).
+		Body(&CreateUser{})
+
+	js, err := api.MarshalJSONIndent("", "    ")
 	if err != nil {
 		log.Fatal(err)
 	}

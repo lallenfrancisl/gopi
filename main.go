@@ -21,11 +21,10 @@ func main() {
 	}
 	route.Get().
 		Summary("List users").
-		Tags([]string{"api"}).
-		Body(&CreateUser{})
-	
-	route.Get().
-		Summary("List users 2").
+		Tags([]string{"api"})
+
+	route.Post().
+		Summary("Create user").
 		Tags([]string{"api"}).
 		Body(&CreateUser{})
 

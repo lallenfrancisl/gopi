@@ -106,10 +106,27 @@ func (route *Route) Get() *Operation {
 	}
 
 	pathItem.Get = openapi3.NewOperation()
+	pathItem.Get.Responses = openapi3.NewResponses()
 
 	return &Operation{
 		pathItem: pathItem,
 		method:   http.MethodGet,
+		route:    route,
+	}
+}
+
+func (route *Route) Post() *Operation {
+	pathItem := route.gopi.spec.Paths.Find(route.Path)
+	if pathItem == nil {
+		return &Operation{}
+	}
+
+	pathItem.Post = openapi3.NewOperation()
+	pathItem.Post.Responses = openapi3.NewResponses()
+
+	return &Operation{
+		pathItem: pathItem,
+		method:   http.MethodPost,
 		route:    route,
 	}
 }
@@ -197,9 +214,16 @@ func (op *Operation) Body(model any) *Operation {
 		return op
 	}
 
+	content := openapi3.NewContent()
+	content["application/json"] = &openapi3.MediaType{
+		Schema: schemaRef,
+	}
+
 	operation := op.getMatchingOperation()
 	operation.RequestBody = &openapi3.RequestBodyRef{
-		Ref: schemaRef.RefString(),
+		Value: &openapi3.RequestBody{
+			Content: content,
+		},
 	}
 
 	return op

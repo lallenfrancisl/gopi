@@ -36,7 +36,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = os.WriteFile("schema.json", js, os.FileMode(os.O_RDWR))
+	err = os.WriteFile("./build/schema.json", js, os.FileMode(os.O_RDWR))
 	if err != nil {
 		log.Fatal(err)
 	}

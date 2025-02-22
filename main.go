@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/lallenfrancisl/gopi/gopi"
 )
@@ -33,5 +34,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	log.Println(string(js))
+	err = os.WriteFile("schema.json", js, os.FileMode(os.O_RDWR))
+	if err != nil {
+		log.Fatal(err)	
+	}
 }

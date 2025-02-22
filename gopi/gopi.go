@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"reflect"
+	"slices"
+	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/getkin/kin-openapi/openapi3gen"
@@ -208,6 +211,7 @@ func (op *Operation) Body(model any) *Operation {
 			ExportGenerics:         true,
 		}),
 	)
+
 	if err != nil {
 		fmt.Println(err)
 
@@ -215,7 +219,10 @@ func (op *Operation) Body(model any) *Operation {
 	}
 
 	content := openapi3.NewContent()
-	content["application/json"] = &openapi3.MediaType{
+
+	contentType := getContentType(model)
+
+	content[contentType] = &openapi3.MediaType{
 		Schema: schemaRef,
 	}
 
@@ -227,6 +234,40 @@ func (op *Operation) Body(model any) *Operation {
 	}
 
 	return op
+}
+
+// Get the content type of the go struct
+func getContentType(model any) string {
+	rv := reflect.ValueOf(model)
+
+	for rv.Kind() == reflect.Ptr || rv.Kind() == reflect.Interface {
+		rv = rv.Elem()
+	}
+
+	kind := rv.Type().Kind()
+
+	jsonKinds := []reflect.Kind{
+		reflect.Struct,
+		reflect.Slice,
+		reflect.Map,
+		reflect.Array,
+		reflect.Map,
+	}
+
+	if slices.Contains(jsonKinds, kind) {
+		return "application/json"
+	}
+
+	// Return default fallback content type
+	return "application/octet-stream"
+}
+
+func splitRefPath(path string) []string {
+	if !strings.HasPrefix(path, "#/") {
+		return []string{}
+	}
+
+	return strings.Split(path, "/")[1:]
 }
 
 // Create a new instance of gopi

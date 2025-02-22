@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/lallenfrancisl/gopi/gopi"
@@ -27,7 +28,8 @@ func main() {
 	route.Post().
 		Summary("Create user").
 		Tags([]string{"api"}).
-		Body(&CreateUser{})
+		Body(&CreateUser{}).
+		Response(http.StatusOK, &CreateUser{})
 
 	js, err := api.MarshalJSONIndent("", "    ")
 	if err != nil {
@@ -36,6 +38,6 @@ func main() {
 
 	err = os.WriteFile("schema.json", js, os.FileMode(os.O_RDWR))
 	if err != nil {
-		log.Fatal(err)	
+		log.Fatal(err)
 	}
 }

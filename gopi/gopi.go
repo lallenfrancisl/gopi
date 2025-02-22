@@ -196,20 +196,14 @@ func (op *Operation) Summary(text string) *Operation {
 	return op
 }
 
-// Set the body of the request
+// Add documentation for request body
 func (op *Operation) Body(model any) *Operation {
 	if op.method == http.MethodGet {
 		return op
 	}
 
-	schemaRef, err := openapi3gen.NewSchemaRefForValue(
-		model,
-		op.route.gopi.spec.Components.Schemas,
-		openapi3gen.CreateComponentSchemas(openapi3gen.ExportComponentSchemasOptions{
-			ExportComponentSchemas: true,
-			ExportTopLevelSchema:   true,
-			ExportGenerics:         true,
-		}),
+	schemaRef, err := generateOpenAPISchemaRef(
+		model, op.route.gopi.spec.Components.Schemas,
 	)
 
 	if err != nil {
@@ -234,6 +228,40 @@ func (op *Operation) Body(model any) *Operation {
 	}
 
 	return op
+}
+
+// Add documentation for response body
+func (op *Operation) Response(status int, model any) *Operation {
+	operation := op.getMatchingOperation()
+	res := openapi3.NewResponse()
+
+	schemaRef, err := generateOpenAPISchemaRef(
+		model, op.route.gopi.spec.Components.Schemas,
+	)
+	if err != nil {
+		fmt.Println(err.Error())
+
+		return op
+	}
+
+	res.WithJSONSchemaRef(schemaRef)
+	operation.AddResponse(status, res)
+
+	return op
+}
+
+func generateOpenAPISchemaRef(model any, schemas openapi3.Schemas) (*openapi3.SchemaRef, error) {
+	schemaRef, err := openapi3gen.NewSchemaRefForValue(
+		model,
+		schemas,
+		openapi3gen.CreateComponentSchemas(openapi3gen.ExportComponentSchemasOptions{
+			ExportComponentSchemas: true,
+			ExportTopLevelSchema:   true,
+			ExportGenerics:         true,
+		}),
+	)
+
+	return schemaRef, err
 }
 
 // Get the content type of the go struct

@@ -1,15 +1,15 @@
-package main
+package gopi_test
 
 import (
-	"log"
 	"net/http"
 	"os"
+	"testing"
 	"time"
 
-	"github.com/lallenfrancisl/gopi/gopi"
+	"github.com/lallenfrancisl/gopi"
 )
 
-func main() {
+func TestGopi(t *testing.T) {
 	api := gopi.New()
 
 	route := api.Route("/users")
@@ -57,11 +57,11 @@ func main() {
 
 	js, err := api.MarshalJSONIndent("", "    ")
 	if err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 
 	err = os.WriteFile("./build/schema.json", js, os.FileMode(os.O_RDWR))
 	if err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 }

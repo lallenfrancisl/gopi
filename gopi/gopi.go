@@ -31,7 +31,8 @@ func newSpec(name string) *openapi3.T {
 }
 
 type Gopi struct {
-	spec *openapi3.T
+	spec      *openapi3.T
+	generator *openapi3gen.Generator
 }
 
 // Create a documentation object for a route
@@ -68,6 +69,15 @@ func (gopi *Gopi) MarshalJSONIndent(prefix string, indent string) ([]byte, error
 	}
 
 	return indented.Bytes(), nil
+}
+
+func (gopi *Gopi) generateOpenAPISchemaRef(model any) (*openapi3.SchemaRef, error) {
+	schemaRef, err := gopi.generator.NewSchemaRefForValue(
+		model,
+		gopi.spec.Components.Schemas,
+	)
+
+	return schemaRef, err
 }
 
 type Route struct {
@@ -202,8 +212,8 @@ func (op *Operation) Body(model any) *Operation {
 		return op
 	}
 
-	schemaRef, err := generateOpenAPISchemaRef(
-		model, op.route.gopi.spec.Components.Schemas,
+	schemaRef, err := op.route.gopi.generateOpenAPISchemaRef(
+		model,
 	)
 
 	if err != nil {
@@ -235,8 +245,8 @@ func (op *Operation) Response(status int, model any) *Operation {
 	operation := op.getMatchingOperation()
 	res := openapi3.NewResponse()
 
-	schemaRef, err := generateOpenAPISchemaRef(
-		model, op.route.gopi.spec.Components.Schemas,
+	schemaRef, err := op.route.gopi.generateOpenAPISchemaRef(
+		model,
 	)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -250,29 +260,21 @@ func (op *Operation) Response(status int, model any) *Operation {
 	return op
 }
 
-func generateOpenAPISchemaRef(model any, schemas openapi3.Schemas) (*openapi3.SchemaRef, error) {
-	schemaRef, err := openapi3gen.NewSchemaRefForValue(
-		model,
-		schemas,
-		openapi3gen.CreateComponentSchemas(openapi3gen.ExportComponentSchemasOptions{
-			ExportComponentSchemas: true,
-			ExportTopLevelSchema:   true,
-			ExportGenerics:         true,
-		}),
-	)
-
-	return schemaRef, err
-}
-
-// Get the content type of the go struct
-func getContentType(model any) string {
-	rv := reflect.ValueOf(model)
+func getKind(input any) reflect.Kind {
+	rv := reflect.ValueOf(input)
 
 	for rv.Kind() == reflect.Ptr || rv.Kind() == reflect.Interface {
 		rv = rv.Elem()
 	}
 
 	kind := rv.Type().Kind()
+
+	return kind
+}
+
+// Get the content type of the go struct
+func getContentType(model any) string {
+	kind := getKind(model)
 
 	jsonKinds := []reflect.Kind{
 		reflect.Struct,
@@ -304,6 +306,14 @@ func New() *Gopi {
 
 	api := &Gopi{
 		spec: spec,
+		generator: openapi3gen.NewGenerator(
+			openapi3gen.CreateComponentSchemas(openapi3gen.ExportComponentSchemasOptions{
+				ExportComponentSchemas: true,
+				ExportTopLevelSchema:   true,
+				ExportGenerics:         true,
+			}),
+			openapi3gen.UseAllExportedFields(),
+		),
 	}
 
 	return api

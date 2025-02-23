@@ -55,6 +55,7 @@ func (gopi *Gopi) MarshalJSON() ([]byte, error) {
 	return gopi.spec.MarshalJSON()
 }
 
+// Marshal the spec into a JSON string with indentation
 func (gopi *Gopi) MarshalJSONIndent(prefix string, indent string) ([]byte, error) {
 	js, err := gopi.spec.MarshalJSON()
 	if err != nil {

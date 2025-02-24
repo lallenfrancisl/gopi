@@ -18,8 +18,8 @@ func TestGopi(t *testing.T) {
 		Summary("This is the summary")
 
 	type Address struct {
-		state   string
-		country string
+		State   string
+		Country string
 	}
 
 	type CreateUser struct {
@@ -40,27 +40,30 @@ func TestGopi(t *testing.T) {
 		Password  string    `json:"password"`
 		CreatedAt Time      `json:"created_at"`
 		UpdatedAt time.Time `json:"updated_at"`
-		Address   Address
+		Address   Address   `json:"address"`
 	}
+
+	type envelope map[string]any
 
 	route.Get().
 		Summary("List users").
 		Tags([]string{"api"}).
-		Response(http.StatusOK, time.Time{})
+		Response(http.StatusOK, envelope{"user": &User{}})
 
 	route.Post().
 		Summary("Create user").
 		Tags([]string{"api"}).
 		Body(&CreateUser{}).
-		Response(http.StatusOK, 1.5).
-		Response(http.StatusBadRequest, &User{})
+		Response(http.StatusOK, envelope{"user": &CreateUser{}}).
+		Response(http.StatusBadRequest, envelope{"error": ""}).
+		Response(http.StatusInternalServerError, map[string]string{})
 
 	js, err := api.MarshalJSONIndent("", "    ")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = os.WriteFile("./build/schema.json", js, os.FileMode(os.O_RDWR))
+	err = os.WriteFile("./build/schema.json", js, os.FileMode(os.O_TRUNC))
 	if err != nil {
 		t.Fatal(err)
 	}

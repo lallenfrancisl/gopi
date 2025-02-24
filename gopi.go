@@ -129,6 +129,7 @@ func (route *Route) Get() *Operation {
 	}
 }
 
+// Add docs for a POST operation on a route
 func (route *Route) Post() *Operation {
 	pathItem := route.gopi.spec.Paths.Find(route.Path)
 	if pathItem == nil {
@@ -141,6 +142,57 @@ func (route *Route) Post() *Operation {
 	return &Operation{
 		pathItem: pathItem,
 		method:   http.MethodPost,
+		route:    route,
+	}
+}
+
+// Add docs for a PUT operation on a route
+func (route *Route) Put() *Operation {
+	pathItem := route.gopi.spec.Paths.Find(route.Path)
+	if pathItem == nil {
+		return &Operation{}
+	}
+
+	pathItem.Put = openapi3.NewOperation()
+	pathItem.Put.Responses = openapi3.NewResponses()
+
+	return &Operation{
+		pathItem: pathItem,
+		method:   http.MethodPut,
+		route:    route,
+	}
+}
+
+// Add docs for a DELETE operation on a route
+func (route *Route) Delete() *Operation {
+	pathItem := route.gopi.spec.Paths.Find(route.Path)
+	if pathItem == nil {
+		return &Operation{}
+	}
+
+	pathItem.Delete = openapi3.NewOperation()
+	pathItem.Delete.Responses = openapi3.NewResponses()
+
+	return &Operation{
+		pathItem: pathItem,
+		method:   http.MethodDelete,
+		route:    route,
+	}
+}
+
+// Add docs for a PATCH operation on a route
+func (route *Route) Patch() *Operation {
+	pathItem := route.gopi.spec.Paths.Find(route.Path)
+	if pathItem == nil {
+		return &Operation{}
+	}
+
+	pathItem.Patch = openapi3.NewOperation()
+	pathItem.Patch.Responses = openapi3.NewResponses()
+
+	return &Operation{
+		pathItem: pathItem,
+		method:   http.MethodPatch,
 		route:    route,
 	}
 }

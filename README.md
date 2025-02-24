@@ -5,9 +5,12 @@ A fluent api for building OpenAPI 3.0 schema intuitively. Still in active develo
 ## Example
 
 ```go
-...
+import (
+	"fmt"
+	"os"
 
-import "github.com/lallenfrancisl/gopi"
+	"github.com/lallenfrancisl/gopi"
+)
 
 var docs *gopi.Gopi = gopi.New()
 
@@ -31,6 +34,20 @@ func main () {
 		})
 
     AddDocs()
+
+	js, err := docs.MarshalJSONIndent("", "    ")
+	if err != nil {
+		fmt.Println(err.Error())
+
+		return
+	}
+
+	err = os.WriteFile("./docs/swagger.json", js, os.FileMode(os.O_TRUNC))
+	if err != nil {
+		fmt.Println(err.Error())
+
+		return
+	}
 }
 
 func AddDocs() {
@@ -94,8 +111,6 @@ func AddDocs() {
 			envelope{"movies": []data.Movie{}, "metadata": data.Metadata{}},
 		)
 }
-
-...
 ```
 
 ## Demo

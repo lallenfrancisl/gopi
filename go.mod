@@ -2,9 +2,7 @@ module github.com/lallenfrancisl/gopi
 
 go 1.23.5
 
-require github.com/getkin/kin-openapi v0.129.1-0.20250210111315-050a93091266
-
-replace github.com/getkin/kin-openapi => github.com/lallenfrancisl/kin-openapi v0.130.0
+require github.com/lallenfrancisl/kin-openapi v0.131.0
 
 require (
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect

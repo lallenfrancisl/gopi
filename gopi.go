@@ -9,8 +9,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/getkin/kin-openapi/openapi3gen"
+	"github.com/lallenfrancisl/kin-openapi/openapi3"
+	"github.com/lallenfrancisl/kin-openapi/openapi3gen"
 )
 
 func newSpec(name string) *openapi3.T {

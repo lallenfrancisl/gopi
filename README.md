@@ -117,4 +117,4 @@ func AddDocs() {
 
 ## Demo
 
-A live demo of this used along with [Scalar](https://scalar.com) can be seen [here](https://api.allenfrancis.me/greenlight/v1/movies).
+A live demo of this used along with [Scalar](https://scalar.com) can be seen [here](https://api.allenfrancis.me/greenlight/v1/docs).

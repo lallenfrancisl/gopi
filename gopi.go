@@ -293,46 +293,6 @@ type Operation struct {
 	route    *Route
 }
 
-func (op *Operation) getMatchingOperation() *openapi3.Operation {
-	if op.method == http.MethodGet {
-		return op.pathItem.Get
-	}
-
-	if op.method == http.MethodConnect {
-		return op.pathItem.Connect
-	}
-
-	if op.method == http.MethodDelete {
-		return op.pathItem.Delete
-	}
-
-	if op.method == http.MethodHead {
-		return op.pathItem.Head
-	}
-
-	if op.method == http.MethodOptions {
-		return op.pathItem.Options
-	}
-
-	if op.method == http.MethodPatch {
-		return op.pathItem.Patch
-	}
-
-	if op.method == http.MethodPost {
-		return op.pathItem.Post
-	}
-
-	if op.method == http.MethodPut {
-		return op.pathItem.Put
-	}
-
-	if op.method == http.MethodTrace {
-		return op.pathItem.Trace
-	}
-
-	return nil
-}
-
 // Add tags for the operation
 func (op *Operation) Tags(tags []string) *Operation {
 	operation := op.getMatchingOperation()
@@ -341,10 +301,27 @@ func (op *Operation) Tags(tags []string) *Operation {
 	return op
 }
 
+// Deprecate this operation
+//
+// This must be used at the last since nothing is allowed
+// to chain after this
+func (op *Operation) Deprecated() {
+	operation := op.getMatchingOperation()
+	operation.Deprecated = true
+}
+
 // Set the summary of the operation
 func (op *Operation) Summary(text string) *Operation {
 	operation := op.getMatchingOperation()
 	operation.Summary = text
+
+	return op
+}
+
+// Set the description of the operation
+func (op *Operation) Description(text string) *Operation {
+	operation := op.getMatchingOperation()
+	operation.Description = text
 
 	return op
 }
@@ -401,6 +378,46 @@ func (op *Operation) Response(status int, model any) *Operation {
 	operation.AddResponse(status, res)
 
 	return op
+}
+
+func (op *Operation) getMatchingOperation() *openapi3.Operation {
+	if op.method == http.MethodGet {
+		return op.pathItem.Get
+	}
+
+	if op.method == http.MethodConnect {
+		return op.pathItem.Connect
+	}
+
+	if op.method == http.MethodDelete {
+		return op.pathItem.Delete
+	}
+
+	if op.method == http.MethodHead {
+		return op.pathItem.Head
+	}
+
+	if op.method == http.MethodOptions {
+		return op.pathItem.Options
+	}
+
+	if op.method == http.MethodPatch {
+		return op.pathItem.Patch
+	}
+
+	if op.method == http.MethodPost {
+		return op.pathItem.Post
+	}
+
+	if op.method == http.MethodPut {
+		return op.pathItem.Put
+	}
+
+	if op.method == http.MethodTrace {
+		return op.pathItem.Trace
+	}
+
+	return nil
 }
 
 func getKind(input any) reflect.Kind {

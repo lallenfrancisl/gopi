@@ -11,6 +11,8 @@ import (
 
 	"github.com/lallenfrancisl/kin-openapi/openapi3"
 	"github.com/lallenfrancisl/kin-openapi/openapi3gen"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 func newSpec(name string) *openapi3.T {
@@ -202,6 +204,19 @@ func (route *Route) Description(text string) *Route {
 	return route
 }
 
+var caser = cases.Title(language.English)
+
+func convertToOperationID(input string) string {
+	words := strings.Split(input, " ")
+	key := strings.ToLower(words[0])
+
+	for _, word := range words[1:] {
+		key += caser.String(word)
+	}
+
+	return key
+}
+
 // Initiate the docs for a GET operation on a route
 func (route *Route) Get() *Operation {
 	pathItem := route.gopi.spec.Paths.Find(route.Path)
@@ -314,6 +329,7 @@ func (op *Operation) Deprecated() {
 func (op *Operation) Summary(text string) *Operation {
 	operation := op.getMatchingOperation()
 	operation.Summary = text
+	operation.OperationID = convertToOperationID(text)
 
 	return op
 }

@@ -2,7 +2,10 @@ module github.com/lallenfrancisl/gopi
 
 go 1.23.5
 
-require github.com/lallenfrancisl/kin-openapi v0.132.0
+require (
+	github.com/lallenfrancisl/kin-openapi v0.132.0
+	golang.org/x/text v0.22.0
+)
 
 // replace github.com/lallenfrancisl/kin-openapi => /home/allen/projekts/kin-openapi
 

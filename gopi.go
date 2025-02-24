@@ -413,9 +413,51 @@ func PathParam(name string, model any) *RouteParam {
 		spec: &openapi3.Parameter{
 			Name:   name,
 			Schema: openapi3.NewStringSchema().NewRef(),
+			In:     openapi3.ParameterInPath,
 		},
 	}
-	param.spec.In = openapi3.ParameterInPath
+
+	return param
+}
+
+// Create query parameter RouteParam instance
+func QueryParam(name string, model any) *RouteParam {
+	param := &RouteParam{
+		model: model,
+		spec: &openapi3.Parameter{
+			Name:   name,
+			Schema: openapi3.NewStringSchema().NewRef(),
+			In:     openapi3.ParameterInQuery,
+		},
+	}
+
+	return param
+}
+
+// Create cookie parameter RouteParam instance
+func CookieParam(name string, model any) *RouteParam {
+	param := &RouteParam{
+		model: model,
+		spec: &openapi3.Parameter{
+			Name:   name,
+			Schema: openapi3.NewStringSchema().NewRef(),
+			In:     openapi3.ParameterInCookie,
+		},
+	}
+
+	return param
+}
+
+// Create header parameter RouteParam instance
+func HeaderParam(name string, model any) *RouteParam {
+	param := &RouteParam{
+		model: model,
+		spec: &openapi3.Parameter{
+			Name:   name,
+			Schema: openapi3.NewStringSchema().NewRef(),
+			In:     openapi3.ParameterInHeader,
+		},
+	}
 
 	return param
 }
@@ -449,7 +491,7 @@ func (param *RouteParam) AllowEmpty() *RouteParam {
 }
 
 // Add RouteParams to an operation
-func (op *Operation) PathParams(params ...*RouteParam) *Operation {
+func (op *Operation) Params(params ...*RouteParam) *Operation {
 	operation := op.getMatchingOperation()
 
 	for _, param := range params {

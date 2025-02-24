@@ -164,10 +164,10 @@ func (gopi *Gopi) MarshalJSONIndent(prefix string, indent string) ([]byte, error
 	return indented.Bytes(), nil
 }
 
-func (gopi *Gopi) generateOpenAPISchemaRef(model any) (*openapi3.SchemaRef, error) {
+func (gopi *Gopi) generateOpenAPISchemaRef(model any, schemas openapi3.Schemas) (*openapi3.SchemaRef, error) {
 	schemaRef, err := gopi.generator.NewSchemaRefForValue(
 		model,
-		gopi.spec.Components.Schemas,
+		schemas,
 	)
 
 	return schemaRef, err
@@ -302,6 +302,7 @@ func (route *Route) Patch() *Operation {
 	}
 }
 
+// Struct for holding methods for managing route operation
 type Operation struct {
 	method   string
 	pathItem *openapi3.PathItem
@@ -350,6 +351,7 @@ func (op *Operation) Body(model any) *Operation {
 
 	schemaRef, err := op.route.gopi.generateOpenAPISchemaRef(
 		model,
+		op.route.gopi.spec.Components.Schemas,
 	)
 
 	if err != nil {
@@ -383,6 +385,7 @@ func (op *Operation) Response(status int, model any) *Operation {
 
 	schemaRef, err := op.route.gopi.generateOpenAPISchemaRef(
 		model,
+		op.route.gopi.spec.Components.Schemas,
 	)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -392,6 +395,72 @@ func (op *Operation) Response(status int, model any) *Operation {
 
 	res.WithJSONSchemaRef(schemaRef)
 	operation.AddResponse(status, res)
+
+	return op
+}
+
+// Struct for holding a route parameter methods
+// such as path param, query param etc
+type RouteParam struct {
+	spec  *openapi3.Parameter
+	model any
+}
+
+// Create path parameter RouteParam instance
+func PathParam(name string, model any) *RouteParam {
+	param := &RouteParam{
+		model: model,
+		spec: &openapi3.Parameter{
+			Name:   name,
+			Schema: openapi3.NewStringSchema().NewRef(),
+		},
+	}
+	param.spec.In = openapi3.ParameterInPath
+
+	return param
+}
+
+// Set the description of the route parameter
+func (param *RouteParam) Description(input string) *RouteParam {
+	param.spec.Description = input
+
+	return param
+}
+
+// Set the param as required
+func (param *RouteParam) Required() *RouteParam {
+	param.spec.Required = true
+
+	return param
+}
+
+// Deprecate the route parameter
+//
+// This must be specified last, as it doesn't allow further chaining
+func (param *RouteParam) Deprecated() {
+	param.spec.Deprecated = true
+}
+
+// Allow empty values for this parameter
+func (param *RouteParam) AllowEmpty() *RouteParam {
+	param.spec.AllowEmptyValue = true
+
+	return param
+}
+
+// Add RouteParams to an operation
+func (op *Operation) PathParams(params ...*RouteParam) *Operation {
+	operation := op.getMatchingOperation()
+
+	for _, param := range params {
+		schema, err := op.route.gopi.generateOpenAPISchemaRef(param.model, nil)
+		if err != nil {
+			return op
+		}
+
+		param.spec.Schema = schema
+		operation.AddParameter(param.spec)
+	}
 
 	return op
 }
@@ -476,20 +545,24 @@ func splitRefPath(path string) []string {
 	return strings.Split(path, "/")[1:]
 }
 
+func newGenerator() *openapi3gen.Generator {
+	return openapi3gen.NewGenerator(
+		openapi3gen.CreateComponentSchemas(openapi3gen.ExportComponentSchemasOptions{
+			ExportComponentSchemas: true,
+			ExportTopLevelSchema:   true,
+			ExportGenerics:         true,
+		}),
+		openapi3gen.UseAllExportedFields(),
+	)
+}
+
 // Create a new instance of gopi
 func New() *Gopi {
 	spec := newSpec("test")
 
 	api := &Gopi{
-		spec: spec,
-		generator: openapi3gen.NewGenerator(
-			openapi3gen.CreateComponentSchemas(openapi3gen.ExportComponentSchemasOptions{
-				ExportComponentSchemas: true,
-				ExportTopLevelSchema:   true,
-				ExportGenerics:         true,
-			}),
-			openapi3gen.UseAllExportedFields(),
-		),
+		spec:      spec,
+		generator: newGenerator(),
 	}
 
 	return api

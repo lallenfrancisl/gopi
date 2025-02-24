@@ -5,6 +5,8 @@ A fluent api for building OpenAPI 3.0 schema intuitively. Still in active develo
 ## Example
 
 ```go
+package main
+
 import (
 	"fmt"
 	"os"

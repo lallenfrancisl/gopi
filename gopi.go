@@ -20,8 +20,8 @@ func newSpec(name string) *openapi3.T {
 			Title:      name,
 			Version:    "0.0.0",
 			Extensions: map[string]interface{}{},
-			Contact: &openapi3.Contact{},
-			License: &openapi3.License{},
+			Contact:    &openapi3.Contact{},
+			License:    &openapi3.License{},
 		},
 		Components: &openapi3.Components{
 			Schemas:    make(openapi3.Schemas),
@@ -108,6 +108,34 @@ func (gopi *Gopi) License(license LicenseDef) *Gopi {
 // Set the version of the api
 func (gopi *Gopi) Version(version string) *Gopi {
 	gopi.spec.Info.Version = version
+
+	return gopi
+}
+
+type ExternalDocDef struct {
+	Description string
+	URL         string
+}
+
+type TagDef struct {
+	Name         string
+	Description  string
+	ExternalDocs ExternalDocDef
+}
+
+// Define a tag for use in operation objects
+//
+// The metadata from this will be shown when the tag is used
+// in documentation
+func (gopi *Gopi) DefineTag(tag TagDef) *Gopi {
+	gopi.spec.Tags = append(gopi.spec.Tags, &openapi3.Tag{
+		Name:        tag.Name,
+		Description: tag.Description,
+		ExternalDocs: &openapi3.ExternalDocs{
+			Description: tag.ExternalDocs.Description,
+			URL:         tag.ExternalDocs.URL,
+		},
+	})
 
 	return gopi
 }

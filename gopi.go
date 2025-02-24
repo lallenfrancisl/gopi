@@ -20,6 +20,8 @@ func newSpec(name string) *openapi3.T {
 			Title:      name,
 			Version:    "0.0.0",
 			Extensions: map[string]interface{}{},
+			Contact: &openapi3.Contact{},
+			License: &openapi3.License{},
 		},
 		Components: &openapi3.Components{
 			Schemas:    make(openapi3.Schemas),
@@ -48,6 +50,66 @@ func (gopi *Gopi) Route(path string) *Route {
 		gopi: gopi,
 		Path: path,
 	}
+}
+
+// Set the title of the api
+func (gopi *Gopi) Title(text string) *Gopi {
+	gopi.spec.Info.Title = text
+
+	return gopi
+}
+
+// Set the description of the api
+func (gopi *Gopi) Description(text string) *Gopi {
+	gopi.spec.Info.Description = text
+
+	return gopi
+}
+
+// Set the terms of service of the api
+//
+// This must be a valid URL
+func (gopi *Gopi) TermsOfService(text string) *Gopi {
+	gopi.spec.Info.TermsOfService = text
+
+	return gopi
+}
+
+// Struct passed in for defining the contact details
+type ContactDef struct {
+	Name  string
+	URL   string
+	Email string
+}
+
+// Set the contact details of the api
+func (gopi *Gopi) Contact(contact ContactDef) *Gopi {
+	gopi.spec.Info.Contact.Name = contact.Name
+	gopi.spec.Info.Contact.URL = contact.URL
+	gopi.spec.Info.Contact.Email = contact.Email
+
+	return gopi
+}
+
+// Struct passed in to set license details of the API
+type LicenseDef struct {
+	Name string
+	URL  string
+}
+
+// Set the license details of the API
+func (gopi *Gopi) License(license LicenseDef) *Gopi {
+	gopi.spec.Info.License.Name = license.Name
+	gopi.spec.Info.License.URL = license.URL
+
+	return gopi
+}
+
+// Set the version of the api
+func (gopi *Gopi) Version(version string) *Gopi {
+	gopi.spec.Info.Version = version
+
+	return gopi
 }
 
 // Marshal the spec into a JSON string
